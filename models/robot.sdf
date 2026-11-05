@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="mon_robot">
+
+    <!-- CHASSIS : el corps -->
+    <link name="chassis">
+      <pose>0 0 0.1 0 0 0</pose>
+      <inertial>
+        <mass>5.0</mass>
+      </inertial>
+      <visual name="visual">
+        <geometry><box><size>0.4 0.2 0.1</size></box></geometry>
+        <material><ambient>0 0 1 1</ambient><diffuse>0 0 1 1</diffuse></material>
+      </visual>
+      <collision name="collision">
+        <geometry><box><size>0.4 0.2 0.1</size></box></geometry>
+      </collision>
+    </link>
+
+    <!-- ROUE GAUCHE -->
+    <link name="left_wheel">
+      <pose>0 0.12 0.1 -1.5708 0 0</pose>
+      <inertial><mass>1.0</mass></inertial>
+      <visual name="visual">
+        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+        <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
+      </visual>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <!-- ROUE DROITE -->
+    <link name="right_wheel">
+      <pose>0 -0.12 0.1 -1.5708 0 0</pose>
+      <inertial><mass>1.0</mass></inertial>
+      <visual name="visual">
+        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+        <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
+      </visual>
+      <collision name="collision">
+        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <!-- ROUE FOLLE (bech ma yطe7ch men quddem) : sphère sans friction -->
+    <link name="caster">
+      <pose>-0.15 0 0.05 0 0 0</pose>
+      <inertial><mass>0.5</mass></inertial>
+      <visual name="visual">
+        <geometry><sphere><radius>0.05</radius></sphere></geometry>
+      </visual>
+      <collision name="collision">
+        <geometry><sphere><radius>0.05</radius></sphere></geometry>
+        <surface>
+          <friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- JOINTS : el rabt -->
+    <joint name="left_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>left_wheel</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <joint name="right_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>right_wheel</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <joint name="caster_joint" type="ball">
+      <parent>chassis</parent>
+      <child>caster</child>
+    </joint>
+
+    <!-- PLUGIN : yخalli Gazebo yfahem cmd_vel -->
+    <plugin filename="ignition-gazebo-diff-drive-system"
+            name="ignition::gazebo::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.24</wheel_separation>
+      <wheel_radius>0.1</wheel_radius>
+      <topic>/cmd_vel</topic>
+      <odom_topic>/odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>chassis</child_frame_id>
+    </plugin>
+
+  </model>
+</sdf>
