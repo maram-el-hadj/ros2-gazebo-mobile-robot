@@ -26,8 +26,11 @@
         <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
       </visual>
       <collision name="collision">
-        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
-      </collision>
+  <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+  <surface>
+    <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+  </surface>
+</collision>
     </link>
 
     <!-- ROUE DROITE -->
@@ -39,14 +42,19 @@
         <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
       </visual>
       <collision name="collision">
-        <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
-      </collision>
+  <geometry><cylinder><radius>0.1</radius><length>0.05</length></cylinder></geometry>
+  <surface>
+    <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+  </surface>
+</collision>
     </link>
 
     <!-- ROUE FOLLE (bech ma yطe7ch men quddem) : sphère sans friction -->
     <link name="caster">
-      <pose>-0.15 0 0.05 0 0 0</pose>
-      <inertial><mass>0.5</mass></inertial>
+      <pose>0 0 0.07 0 0 0</pose>
+<inertial>
+  <mass>8.0</mass>
+</inertial>
       <visual name="visual">
         <geometry><sphere><radius>0.05</radius></sphere></geometry>
       </visual>
