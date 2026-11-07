@@ -20,6 +20,7 @@ def generate_launch_description():
         arguments=[
             '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry',
+            '/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
         ],
         output='screen')
 

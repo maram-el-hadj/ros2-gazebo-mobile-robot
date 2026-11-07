@@ -30,6 +30,7 @@ setup(
     entry_points={
         'console_scripts': [
             'driver_node = robot_basics.driver_node:main',
+            'obstacle_avoider = robot_basics.obstacle_avoider:main',
         ],
     },
 )
