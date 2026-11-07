@@ -3,12 +3,14 @@
 <package format="3">
   <name>robot_basics</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="maram.elhadj@ieee.com">maram</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Robot mobile differentiel ROS 2 / Gazebo Fortress</description>
+  <maintainer email="maram@todo.todo">maram</maintainer>
+  <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
