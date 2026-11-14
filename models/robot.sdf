@@ -2,7 +2,7 @@
 <sdf version="1.8">
   <model name="mon_robot">
 
-    <!-- CHASSIS : bas et lourd -->
+    <!-- CHASSIS -->
     <link name="chassis">
       <pose>0 0 0.08 0 0 0</pose>
       <inertial>
@@ -27,16 +27,19 @@
       <inertial>
         <mass>0.5</mass>
         <inertia>
-          <ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz>
+          <ixx>0.001</ixx><iyy>0.001</iyy><izz>0.0016</izz>
           <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
         </inertia>
       </inertial>
       <visual name="visual">
         <geometry><cylinder><radius>0.08</radius><length>0.04</length></cylinder></geometry>
-        <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
       </visual>
       <collision name="collision">
         <geometry><cylinder><radius>0.08</radius><length>0.04</length></cylinder></geometry>
+        <surface>
+          <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+        </surface>
       </collision>
     </link>
 
@@ -46,70 +49,25 @@
       <inertial>
         <mass>0.5</mass>
         <inertia>
-          <ixx>0.001</ixx><iyy>0.001</iyy><izz>0.001</izz>
+          <ixx>0.001</ixx><iyy>0.001</iyy><izz>0.0016</izz>
           <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
         </inertia>
       </inertial>
       <visual name="visual">
         <geometry><cylinder><radius>0.08</radius><length>0.04</length></cylinder></geometry>
-        <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+        <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
       </visual>
       <collision name="collision">
         <geometry><cylinder><radius>0.08</radius><length>0.04</length></cylinder></geometry>
+        <surface>
+          <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+        </surface>
       </collision>
     </link>
 
-    <!-- CASTER BACK -->
+    <!-- ROUE FOLLE ARRIERE -->
     <link name="caster_back">
       <pose>-0.17 0 0.045 0 0 0</pose>
-      <inertial>
-        <mass>0.2</mass>
-        <inertia>
-          <ixx>0.0001</ixx><iyy>0.0001</iyy><izz>0.0001</izz>
-          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-        </inertia>
-      </inertial>
-      <visual name="visual">
-        <geometry><sphere><radius>0.045</radius></sphere></geometry>
-        <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
-      </visual>
-      <collision name="collision">
-        <geometry><sphere><radius>0.045</radius></sphere></geometry>
-        <surface>
-          <friction>
-            <ode><mu>0.0</mu><mu2>0.0</mu2></ode>
-          </friction>
-        </surface>
-      </collision>
-    </link>
-
-    <!-- CASTER FRONT -->
-    <link name="caster_front">
-      <pose>0.17 0 0.045 0 0 0</pose>
-      <inertial>
-        <mass>0.2</mass>
-        <inertia>
-          <ixx>0.0001</ixx><iyy>0.0001</iyy><izz>0.0001</izz>
-          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
-        </inertia>
-      </inertial>
-      <visual name="visual">
-        <geometry><sphere><radius>0.045</radius></sphere></geometry>
-        <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
-      </visual>
-      <collision name="collision">
-        <geometry><sphere><radius>0.045</radius></sphere></geometry>
-        <surface>
-          <friction>
-            <ode><mu>0.0</mu><mu2>0.0</mu2></ode>
-          </friction>
-        </surface>
-      </collision>
-    </link>
-
-    <!-- LIDAR SENSOR LINK -->
-    <link name="lidar_link">
-      <pose>0.1 0 0.23 0 0 0</pose>
       <inertial>
         <mass>0.1</mass>
         <inertia>
@@ -118,18 +76,62 @@
         </inertia>
       </inertial>
       <visual name="visual">
-        <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
-        <material><ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse></material>
+        <geometry><sphere><radius>0.04</radius></sphere></geometry>
       </visual>
       <collision name="collision">
-        <geometry><cylinder><radius>0.05</radius><length>0.04</length></cylinder></geometry>
+        <geometry><sphere><radius>0.04</radius></sphere></geometry>
+        <surface>
+          <friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
+        </surface>
       </collision>
+    </link>
+
+    <!-- ROUE FOLLE AVANT -->
+    <link name="caster_front">
+      <pose>0.17 0 0.045 0 0 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>0.0001</ixx><iyy>0.0001</iyy><izz>0.0001</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <geometry><sphere><radius>0.04</radius></sphere></geometry>
+      </visual>
+      <collision name="collision">
+        <geometry><sphere><radius>0.04</radius></sphere></geometry>
+        <surface>
+          <friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- LIDAR : position (0.1, 0, 0.23) dans le repere du robot -->
+    <link name="lidar_link">
+      <pose>0.1 0 0.23 0 0 0</pose>
+      <inertial>
+        <mass>0.05</mass>
+        <inertia>
+          <ixx>0.00002</ixx><iyy>0.00002</iyy><izz>0.00003</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="lidar_visual">
+        <geometry><cylinder><radius>0.04</radius><length>0.04</length></cylinder></geometry>
+        <material><ambient>0.1 0.1 0.1 1</ambient><diffuse>0.1 0.1 0.1 1</diffuse></material>
+      </visual>
+
       <sensor name="lidar" type="gpu_lidar">
-        <pose>0 0 0.02 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
+        <topic>/scan</topic>
+        <update_rate>10</update_rate>
+        <always_on>true</always_on>
+        <visualize>false</visualize>
         <ray>
           <scan>
             <horizontal>
-              <samples>360</samples>
+              <samples>120</samples>
               <resolution>1</resolution>
               <min_angle>-3.14159</min_angle>
               <max_angle>3.14159</max_angle>
@@ -141,9 +143,6 @@
             <resolution>0.01</resolution>
           </range>
         </ray>
-        <always_on>1</always_on>
-        <visualize>true</visualize>
-        <topic>/scan</topic>
       </sensor>
     </link>
 
@@ -151,13 +150,19 @@
     <joint name="left_wheel_joint" type="revolute">
       <parent>chassis</parent>
       <child>left_wheel</child>
-      <axis><xyz>0 0 1</xyz></axis>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+      </axis>
     </joint>
 
     <joint name="right_wheel_joint" type="revolute">
       <parent>chassis</parent>
       <child>right_wheel</child>
-      <axis><xyz>0 0 1</xyz></axis>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper></limit>
+      </axis>
     </joint>
 
     <joint name="caster_back_joint" type="ball">
@@ -175,21 +180,19 @@
       <child>lidar_link</child>
     </joint>
 
-    <!-- PLUGIN DIFF DRIVE -->
-    <plugin
-      filename="gz-sim-diff-drive-system"
-      name="gz::sim::systems::DiffDrive">
+    <!-- PLUGIN DiffDrive : publie /odom et la transformation odom -> base_link -->
+    <plugin filename="ignition-gazebo-diff-drive-system"
+            name="ignition::gazebo::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
       <wheel_separation>0.24</wheel_separation>
       <wheel_radius>0.08</wheel_radius>
-      <max_linear_acceleration>2.0</max_linear_acceleration>
-      <max_angular_acceleration>4.0</max_angular_acceleration>
+      <max_linear_acceleration>1.5</max_linear_acceleration>
+      <max_angular_acceleration>3.0</max_angular_acceleration>
       <topic>/cmd_vel</topic>
       <odom_topic>/odom</odom_topic>
-      <tf_topic>/tf</tf_topic>
       <frame_id>odom</frame_id>
-      <child_frame_id>chassis</child_frame_id>
+      <child_frame_id>base_link</child_frame_id>
     </plugin>
 
   </model>
