@@ -1,40 +1,58 @@
 # Robot mobile différentiel : ROS 2 Humble + Gazebo Fortress
 
 Simulation d'un robot mobile à deux roues motrices, conçu entièrement à partir
-de zéro (modèle SDF, monde, lidar, nœuds ROS 2) et piloté depuis ROS 2 via
-`ros_gz_bridge`. Aucun robot réel n'est nécessaire.
+de zéro (modèle SDF, monde, lidar, nœuds ROS 2) : piloté depuis ROS 2 via
+`ros_gz_bridge`, il évite les obstacles et cartographie son environnement avec
+SLAM Toolbox. Aucun robot réel n'est nécessaire.
 
 ## Fonctionnalités
-- Modèle de robot différentiel (chassis, 2 roues motrices, 2 roues folles, lidar)
+- Modèle de robot différentiel (châssis, 2 roues motrices, 2 roues folles, lidar)
 - Monde de simulation : pièce de 6 x 6 m avec un obstacle
-- Pont ROS 2 ↔ Gazebo (`/cmd_vel`, `/odom`, `/scan`)
+- Pont ROS 2 ↔ Gazebo (`/cmd_vel`, `/odom`, `/scan`, `/tf`, `/clock`)
 - Évitement d'obstacles avec lidar 2D (machine à états avec hystérésis)
-- À venir : SLAM et navigation autonome (Nav2)
+- Arbre TF complet (`map → odom → base_link → lidar`)
+- Cartographie SLAM (SLAM Toolbox) et sauvegarde de la carte
+- À venir : navigation autonome avec Nav2
+
+## Aperçu
+![Carte SLAM](docs/slam_map.png)
 
 ## Architecture
 ```
 Gazebo Fortress (physique, robot, lidar)
-      |  /scan, /odom         ^  /cmd_vel
-      v                       |
-        ros_gz_bridge
-      |  /scan, /odom         ^  /cmd_vel
-      v                       |
-ROS 2 Humble : obstacle_avoider (et driver_node pour les tests)
+      |  /scan, /odom, /tf, /clock     ^  /cmd_vel
+      v                                |
+              ros_gz_bridge
+      |                                ^
+      v                                |
+ROS 2 Humble : obstacle_avoider, slam_toolbox
 ```
 
-| Topic | Type ROS 2 | Sens |
+| Topic | Type | Sens |
 |---|---|---|
 | `/cmd_vel` | `geometry_msgs/Twist` | ROS 2 → Gazebo |
 | `/odom` | `nav_msgs/Odometry` | Gazebo → ROS 2 |
 | `/scan` | `sensor_msgs/LaserScan` | Gazebo → ROS 2 |
 | `/tf` | `tf2_msgs/TFMessage` | Gazebo → ROS 2 (odom → base_link) |
 | `/clock` | `rosgraph_msgs/Clock` | Gazebo → ROS 2 |
+| `/map` | `nav_msgs/OccupancyGrid` | SLAM Toolbox → ROS 2 |
+
+Arbre TF :
+```
+map -> odom -> base_link -> mon_robot/lidar_link/lidar
+SLAM   DiffDrive            static_transform_publisher
+```
+
 ## Structure du dépôt
 ```
 robot_basics/
-├── models/robot.sdf          # robot : chassis, roues, lidar, plugin DiffDrive
+├── models/robot.sdf          # robot : châssis, roues, lidar, plugin DiffDrive
 ├── worlds/mon_monde.sdf      # monde : sol, murs, obstacle, plugins système
-├── launch/robot.launch.py    # lance Gazebo + bridge
+├── launch/
+│   ├── robot.launch.py       # Gazebo + bridge + transform statique du lidar
+│   └── slam.launch.py        # SLAM Toolbox
+├── config/slam_params.yaml   # paramètres du SLAM
+├── maps/                     # cartes sauvegardées (.pgm + .yaml)
 ├── robot_basics/
 │   ├── driver_node.py        # avance jusqu'à x = 2 m en lisant /odom
 │   └── obstacle_avoider.py   # évitement d'obstacles avec /scan
@@ -45,7 +63,10 @@ robot_basics/
 
 ## Prérequis
 - Ubuntu 22.04, ROS 2 Humble, Gazebo Fortress (`ign gazebo`)
-- `sudo apt install ros-humble-ros-gz`
+```bash
+sudo apt install ros-humble-ros-gz ros-humble-slam-toolbox \
+  ros-humble-nav2-map-server ros-humble-tf2-tools ros-humble-rviz2
+```
 
 ## Installation
 ```bash
@@ -57,48 +78,55 @@ source install/setup.bash
 ```
 
 ## Utilisation
-Terminal 1 : simulation + bridge
+Chaque terminal doit d'abord charger ROS 2 et le workspace (`source`).
+
+1. Simulation + bridge + TF :
 ```bash
 ros2 launch robot_basics robot.launch.py
 ```
-Terminal 2 : évitement d'obstacles
+2. SLAM :
+```bash
+ros2 launch robot_basics slam.launch.py
+```
+3. Faire bouger le robot (évitement automatique) :
 ```bash
 ros2 run robot_basics obstacle_avoider
 ```
-Alternative de test (utilise `/odom`, s'arrête à x = 2 m) :
+4. Visualiser (Fixed Frame = `map`, ajouter Map `/map`, TF, LaserScan `/scan`) :
 ```bash
-ros2 run robot_basics driver_node
+ros2 run rviz2 rviz2 --ros-args -p use_sim_time:=true
 ```
-Ne pas lancer les deux nœuds ensemble : ils publient tous les deux sur `/cmd_vel`.
+5. Sauvegarder la carte :
+```bash
+ros2 run nav2_map_server map_saver_cli -f ~/maram_ws/src/robot_basics/maps/mon_monde
+```
 
-Vérifications :
-```bash
-ros2 topic list
-ros2 topic hz /scan
-ros2 topic echo /odom --once
-```
+Alternative au pilotage automatique : `ros2 run teleop_twist_keyboard teleop_twist_keyboard`
+(ne pas lancer en même temps qu'`obstacle_avoider` : tous deux publient sur `/cmd_vel`).
+
+Nœud de test (`/odom`, s'arrête à x = 2 m) : `ros2 run robot_basics driver_node`.
 
 ## Choix techniques
-- **`ogre2`** comme moteur de rendu : nécessaire pour `gpu_lidar` (avec `ogre`, les mesures étaient fausses).
+- **`ogre2`** pour `gpu_lidar` (avec `ogre`, les mesures étaient fausses).
 - **Stabilité** : deux roues folles, châssis bas et lourd, inerties explicites, accélérations limitées.
 - **Performance** : pas de temps 4 ms, lidar 120 rayons, ombres désactivées.
-- **Évitement** : 3 secteurs (devant, gauche, droite), seuils 0.7 m / 0.95 m (hystérésis), direction choisie une seule fois par virage.
+- **Évitement** : 3 secteurs, seuils 0.7 m / 0.95 m (hystérésis), direction choisie une fois par virage.
+- **TF** : `odom → base_link` publié par DiffDrive, `base_link → lidar` statique, `map → odom` par SLAM.
+- **SLAM** : `async_slam_toolbox_node`, résolution 5 cm, une mise à jour toutes les 0.5 s.
 
 ## Limites connues
-- Chemins absolus (`/home/maram/maram_ws/...`) dans `worlds/mon_monde.sdf` et le launch file.
-- Le topic `/scan` est publié plus vite que les 10 Hz demandés (à investiguer).
-
-## Aperçu
-![Simulation](docs/gazebo_world.png)
+- Chemins absolus dans `worlds/mon_monde.sdf` et `robot.launch.py`.
+- `/scan` est publié plus vite que les 10 Hz demandés (limité côté SLAM).
+- La dérive d'odométrie augmente quand le robot tourne vite.
 
 ## Roadmap
 - [x] Étape 1 : robot différentiel (SDF + DiffDrive)
 - [x] Étape 2 : monde, murs, obstacle, launch file
 - [x] Étape 3 : bridge ROS 2 ↔ Gazebo, nœud de contrôle
 - [x] Étape 4 : lidar + évitement d'obstacles
-- [x] Étape 5 : TF et odométrie
-- [ ] Étape 6 : SLAM Toolbox
-- [ ] Étape 7 : navigation avec Nav2
+- [x] Étape 5 : TF, odométrie, horloge de simulation
+- [x] Étape 6 : SLAM Toolbox (cartographie)
+- [ ] Étape 7 : navigation autonome avec Nav2
 - [ ] Chemins portables
 
 ## Auteur

@@ -95,3 +95,34 @@ Gazebo (simulation physique) <-> ros_gz_bridge <-> ROS 2 (noeuds de controle)
 - Difference entre odom et map ? odom : continu mais derive ; map : global, corrige par SLAM
 - Pourquoi une transformation statique pour le lidar ? Il est fixe sur le robot
 - Pourquoi use_sim_time ? Les horodatages viennent de Gazebo, pas de l'horloge du PC
+
+## Etape 6 : SLAM avec SLAM Toolbox
+- SLAM = Simultaneous Localization And Mapping : construire la carte et se
+  localiser dessus en meme temps
+- Carte = occupancy grid (/map, nav_msgs/OccupancyGrid) : 0 libre, 100 occupe,
+  -1 inconnu ; resolution 0.05 m par case
+- Principe : scan matching (aligner le scan sur la carte) pour corriger la derive
+  de l'odometrie ; SLAM publie la TF map -> odom (la correction)
+- Arbre TF : map -> odom -> base_link -> lidar
+- Loop closure : quand le robot revoit un endroit deja visite, la trajectoire est
+  corrigee globalement
+- async_slam_toolbox_node : traite les scans dans un thread separe, saute des
+  scans si necessaire (adapte a un PC modeste)
+- Configuration (config/slam_params.yaml) : odom_frame, map_frame, base_frame,
+  scan_topic, mode: mapping, use_sim_time, resolution, max_laser_range,
+  minimum_time_interval (limite la cadence car /scan est tres rapide)
+- Le nom du noeud dans le launch doit correspondre a la cle du yaml (slam_toolbox)
+- Launch file separe (slam.launch.py) avec get_package_share_directory
+  (pas de chemin absolu)
+- Sauvegarde : ros2 run nav2_map_server map_saver_cli -f maps/mon_monde
+  -> mon_monde.pgm (image) + mon_monde.yaml (resolution, origin)
+- Aucun nouveau code Python : configuration + launch file
+- Erreurs : carte floue si le robot tourne trop vite (derive en rotation)
+
+### Questions d'entretien (etape 6)
+- Qu'est-ce que le SLAM et pourquoi est-ce difficile ? Probleme de l'oeuf et de la poule
+- Qu'est-ce qu'un occupancy grid ? Grille avec probabilite d'occupation
+- Que publie SLAM sur TF et pourquoi ? map -> odom : correction de la derive
+- Difference entre mapping et localization ?
+- Qu'est-ce que le loop closure ?
+- Pourquoi async ? Ne bloque pas si le traitement est plus lent que le lidar
