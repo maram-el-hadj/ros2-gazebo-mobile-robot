@@ -75,3 +75,23 @@ Gazebo (simulation physique) <-> ros_gz_bridge <-> ROS 2 (noeuds de controle)
 - Pourquoi le plugin Sensors et le moteur ogre2 ?
 - Pourquoi l'hysteresis dans l'evitement ? Eviter l'oscillation entre TURN et FORWARD
 - Comment as-tu debugge un robot qui ne bougeait pas ? Test de chaque maillon
+
+## Etape 5 : TF, odometrie, horloge de simulation
+- Frame = repere ; TF = systeme qui memorise les transformations entre reperes
+  (/tf dynamique, /tf_static fixe)
+- Arbre : map -> odom -> base_link -> lidar ; map vient du SLAM (etape 6)
+- odom -> base_link : publie par DiffDrive (odometrie des roues), derive avec le temps
+- base_link -> lidar : transformation statique (lidar fixe sur le robot),
+  publiee par tf2_ros static_transform_publisher
+- Le nom du frame du lidar est celui du header de /scan (mon_robot/lidar_link/lidar)
+- Bridge : /tf (Pose_V -> TFMessage, remap de /model/mon_robot/tf) et /clock
+- /clock + use_sim_time:=true : tous les noeuds utilisent l'heure de la simulation,
+  sinon TF rejette les messages (horodatage incoherent)
+- Verification : tf2_echo odom base_link, view_frames, RViz (Fixed Frame = odom)
+- Derive : l'odometrie accumule des erreurs ; le SLAM la corrige (map -> odom)
+
+### Questions d'entretien (etape 5)
+- Qu'est-ce que TF et pourquoi en a-t-on besoin ? Convertir les mesures d'un repere a un autre
+- Difference entre odom et map ? odom : continu mais derive ; map : global, corrige par SLAM
+- Pourquoi une transformation statique pour le lidar ? Il est fixe sur le robot
+- Pourquoi use_sim_time ? Les horodatages viennent de Gazebo, pas de l'horloge du PC

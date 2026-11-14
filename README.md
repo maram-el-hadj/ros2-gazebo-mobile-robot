@@ -27,7 +27,8 @@ ROS 2 Humble : obstacle_avoider (et driver_node pour les tests)
 | `/cmd_vel` | `geometry_msgs/Twist` | ROS 2 → Gazebo |
 | `/odom` | `nav_msgs/Odometry` | Gazebo → ROS 2 |
 | `/scan` | `sensor_msgs/LaserScan` | Gazebo → ROS 2 |
-
+| `/tf` | `tf2_msgs/TFMessage` | Gazebo → ROS 2 (odom → base_link) |
+| `/clock` | `rosgraph_msgs/Clock` | Gazebo → ROS 2 |
 ## Structure du dépôt
 ```
 robot_basics/
@@ -95,7 +96,7 @@ ros2 topic echo /odom --once
 - [x] Étape 2 : monde, murs, obstacle, launch file
 - [x] Étape 3 : bridge ROS 2 ↔ Gazebo, nœud de contrôle
 - [x] Étape 4 : lidar + évitement d'obstacles
-- [ ] Étape 5 : TF et odométrie
+- [x] Étape 5 : TF et odométrie
 - [ ] Étape 6 : SLAM Toolbox
 - [ ] Étape 7 : navigation avec Nav2
 - [ ] Chemins portables
